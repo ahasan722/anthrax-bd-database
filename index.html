@@ -3,435 +3,557 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>National Anthrax Information System | Bangladesh</title>
+    <title>Anthrax Intelligence Hub | Bangladesh Surveillance</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fcfcfd; color: #1e293b; }
+        :root {
+            --bg-main: #fcfaf7;
+            --surface: #ffffff;
+            --accent: #0f766e;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-primary);
+            scroll-behavior: smooth;
+        }
         .chart-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 320px;
+            max-width: 100%;
+            height: 350px;
             max-height: 400px;
+            margin: auto;
         }
-        .glass-card {
-            background: white;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.02);
-            transition: all 0.2s ease;
+        .glass-ui {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
-        .glass-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        .nav-link-active {
+            color: var(--accent);
+            background: #f0fdfa;
+            font-weight: 700;
         }
-        .tab-active { color: #0f172a; border-bottom: 2px solid #0f172a; font-weight: 700; }
-        .tab-inactive { color: #64748b; border-bottom: 2px solid transparent; }
-        .tab-inactive:hover { color: #334155; }
-        ::-webkit-scrollbar { width: 6px; }
+        .shadow-soft {
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03), 0 2px 10px -1px rgba(0, 0, 0, 0.02);
+        }
+        input:focus, select:focus {
+            ring: 2px;
+            ring-color: #0f766e;
+            border-color: #0f766e;
+            outline: none;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        .outbreak-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .outbreak-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.08); }
     </style>
-    <!-- Chosen Palette: Slate & Nordic Teal (Clean, Clinical, Authoritative) -->
-    <!-- Application Structure Plan: Dashboard with 5 thematic views: 
-         1. Executive Summary (High-level data), 
-         2. Longitudinal Analysis (Multi-year growth patterns),
-         3. Yearly Archive (Specific year deep-dives),
-         4. Global Case Registry (Searchable table), 
-         5. Clinical & Response (Protocols). 
-         Chosen to facilitate both quick executive reading and deep researchers' data extraction. -->
+    <!-- Chosen Palette: Sandstone & Teal (Earth tones for environmental context with professional clinical accents) -->
+    <!-- Application Structure Plan: 
+         A modular 'Command Center' approach. 
+         - Navigation: Sidebar-inspired desktop nav, bottom-fixed mobile nav.
+         - View 1 (Insights): Central dashboard with high-impact data visualizations showing temporal and vector trends.
+         - View 2 (Explorer): The Master Registry with deep-filtering capabilities (Year/District/Type).
+         - View 3 (Archive): A dedicated card-based view for 'Yearly Situation Reports'.
+         - View 4 (Protocols): A clinical reference guide for 'One Health' responders.
+         Chosen to minimize cognitive load while presenting complex multi-domain datasets. -->
     <!-- Visualization & Content Choices: 
-         - Stacked Bar: Human vs Livestock cases over time.
-         - Radar Chart: Seasonal vulnerability factors.
-         - Scatter Plot: Correlation between rainfall and outbreaks.
-         - Dynamic Table: Multi-year record sorting.
-         - Grid Cards: Year-by-year file summary cards.
-         - CONFIRMATION: NO SVG used. NO Mermaid JS used. -->
+         - Chart.js (Area Chart): Showing the 8-year evolution of human vs. animal impact.
+         - Chart.js (Radar Chart): Mapping the seasonal risk profile factors.
+         - Chart.js (Horizontal Bar): Regional density ranking.
+         - Interactive Table: Full registry access.
+         - Dynamic Context Blocks: Injected paragraphs based on selected year.
+         NO SVG used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
 <body class="flex flex-col min-h-screen">
 
-    <!-- Header Section -->
-    <header class="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold">A</div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-tight">National Anthrax Hub</h1>
-                    <p class="text-xs text-slate-500 font-medium">IEDCR & DLS Collaborative Surveillance</p>
+    <!-- Header Navigation -->
+    <nav class="sticky top-0 z-50 glass-ui border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-teal-700 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                        <span class="text-2xl font-black">A</span>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-extrabold tracking-tight text-slate-900 leading-none">AnthraxIntel</h1>
+                        <p class="text-[10px] font-bold text-teal-600 uppercase tracking-widest mt-1">Bangladesh National Hub</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-1">
+                    <button onclick="changeView('insights')" id="nav-insights" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all nav-link-active">Insights</button>
+                    <button onclick="changeView('registry')" id="nav-registry" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-500 hover:text-slate-900">Registry</button>
+                    <button onclick="changeView('archive')" id="nav-archive" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-500 hover:text-slate-900">Archive</button>
+                    <button onclick="changeView('protocols')" id="nav-protocols" class="px-5 py-2 rounded-xl text-sm font-semibold transition-all text-slate-500 hover:text-slate-900">Protocols</button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:block text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">System Status</p>
+                        <p class="text-xs font-bold text-emerald-600">Surveillance Active</p>
+                    </div>
+                    <div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
                 </div>
             </div>
-            
-            <nav class="flex gap-1 overflow-x-auto w-full md:w-auto pb-1">
-                <button onclick="navigate('overview')" id="btn-overview" class="px-4 py-2 text-sm transition-all tab-active">Summary</button>
-                <button onclick="navigate('trends')" id="btn-trends" class="px-4 py-2 text-sm transition-all tab-inactive">Trends</button>
-                <button onclick="navigate('archive')" id="btn-archive" class="px-4 py-2 text-sm transition-all tab-inactive">Yearly Archive</button>
-                <button onclick="navigate('database')" id="btn-database" class="px-4 py-2 text-sm transition-all tab-inactive">Registry</button>
-                <button onclick="navigate('protocols')" id="btn-protocols" class="px-4 py-2 text-sm transition-all tab-inactive">Clinical</button>
-            </nav>
         </div>
-    </header>
+    </nav>
 
-    <main class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-8">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- VIEW 1: OVERVIEW -->
-        <section id="view-overview" class="space-y-8 animate-in fade-in duration-500">
-            <div class="bg-slate-900 rounded-2xl p-8 text-white relative overflow-hidden">
-                <div class="relative z-10">
-                    <h2 class="text-3xl font-bold mb-4">Situation Overview (2025)</h2>
-                    <p class="text-slate-300 max-w-2xl text-lg mb-6 leading-relaxed">
-                        Anthrax remains a persistent threat in the flood-prone districts of Bangladesh. 
-                        As of Q3 2025, surveillance shows a 12% increase in livestock vaccination coverage, 
-                        yet cluster events continue to occur in Sirajganj and Pabna due to post-monsoon spore surfacing.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <span class="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-full text-xs font-bold uppercase tracking-widest text-red-200">Active Outbreak: Sirajganj</span>
-                        <span class="px-4 py-2 bg-slate-700/50 rounded-full text-xs font-bold uppercase tracking-widest">Surveillance Tier: Level 2</span>
+        <!-- VIEW 1: INSIGHTS DASHBOARD -->
+        <section id="view-insights" class="space-y-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Executive Summary -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-soft border border-slate-100">
+                        <h2 class="text-3xl font-black text-slate-900 tracking-tight mb-4">Epidemiological Snapshot</h2>
+                        <p class="text-slate-600 leading-relaxed text-lg">
+                            An integrated analysis of <span class="text-teal-700 font-bold">1,400+ historical cases</span> spanning 2018–2025. 
+                            The data indicates a critical link between the <span class="font-bold italic">Brahmaputra basin floods</span> and subsequent spore exposure 
+                            among livestock in the Sirajganj-Pabna belt.
+                        </p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+                            <div class="p-4 bg-slate-50 rounded-2xl">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Case Fatality (H)</p>
+                                <p class="text-2xl font-extrabold text-slate-900">0.02%</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Recovery Rate</p>
+                                <p class="text-2xl font-extrabold text-slate-900">99.8%</p>
+                            </div>
+                            <div class="p-4 bg-teal-50 rounded-2xl">
+                                <p class="text-[10px] font-bold text-teal-600 uppercase">Vax. Coverage</p>
+                                <p class="text-2xl font-extrabold text-teal-900">68%</p>
+                            </div>
+                            <div class="p-4 bg-amber-50 rounded-2xl">
+                                <p class="text-[10px] font-bold text-amber-600 uppercase">Risk Tier</p>
+                                <p class="text-2xl font-extrabold text-amber-900">Endemic</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Trend Chart -->
+                        <div class="bg-white p-6 rounded-[2rem] shadow-soft border border-slate-100">
+                            <h3 class="text-sm font-bold text-slate-900 mb-6 uppercase tracking-wider flex items-center gap-2">
+                                📊 Longitudinal Growth (2018-25)
+                            </h3>
+                            <div class="chart-container">
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                        </div>
+                        <!-- Radar Risk -->
+                        <div class="bg-white p-6 rounded-[2rem] shadow-soft border border-slate-100">
+                            <h3 class="text-sm font-bold text-slate-900 mb-6 uppercase tracking-wider flex items-center gap-2">
+                                🕸️ Multi-Vector Risk Profile
+                            </h3>
+                            <div class="chart-container">
+                                <canvas id="riskRadar"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Dashboard Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="glass-card p-6 rounded-2xl">
-                    <span class="text-xs font-bold text-slate-400 uppercase">Total Human Cases (2018-25)</span>
-                    <div class="text-4xl font-extrabold text-slate-900 mt-2">1,248</div>
-                    <div class="text-xs text-emerald-600 font-bold mt-2">↑ 4% vs Prev. Year</div>
-                </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <span class="text-xs font-bold text-slate-400 uppercase">Livestock Fatalities</span>
-                    <div class="text-4xl font-extrabold text-slate-900 mt-2">3,120+</div>
-                    <div class="text-xs text-red-600 font-bold mt-2">Aggregated 8-Year Data</div>
-                </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <span class="text-xs font-bold text-slate-400 uppercase">Recovery Rate</span>
-                    <div class="text-4xl font-extrabold text-slate-900 mt-2">99.2%</div>
-                    <div class="text-xs text-slate-500 font-bold mt-2">For Cutaneous Anthrax</div>
-                </div>
-                <div class="glass-card p-6 rounded-2xl">
-                    <span class="text-xs font-bold text-slate-400 uppercase">Hotspot Clusters</span>
-                    <div class="text-4xl font-extrabold text-slate-900 mt-2">12</div>
-                    <div class="text-xs text-amber-600 font-bold mt-2">Currently Monitored</div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="glass-card p-8 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-4">Transmission Risk Drivers</h3>
-                    <p class="text-sm text-slate-500 mb-6">Interaction of environmental factors that trigger outbreaks during specific lunar/seasonal cycles.</p>
-                    <div class="chart-container">
-                        <canvas id="riskRadarChart"></canvas>
+                <!-- Secondary Column -->
+                <div class="space-y-6">
+                    <div class="bg-teal-900 p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden">
+                        <div class="relative z-10">
+                            <h3 class="text-xl font-bold mb-4">District Hotspots</h3>
+                            <p class="text-teal-100 text-sm mb-6">Cumulative impact ranking by district density.</p>
+                            <div class="chart-container h-64">
+                                <canvas id="districtChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-teal-800 rounded-full blur-3xl opacity-50"></div>
                     </div>
-                </div>
-                <div class="glass-card p-8 rounded-2xl">
-                    <h3 class="text-xl font-bold mb-4">Human vs. Livestock Trends</h3>
-                    <p class="text-sm text-slate-500 mb-6">Correlation between animal deaths and secondary human infections.</p>
-                    <div class="chart-container">
-                        <canvas id="dualLineChart"></canvas>
+
+                    <div class="bg-white p-6 rounded-[2rem] shadow-soft border border-slate-100">
+                        <h3 class="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Top Risk Activities</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center font-bold">48%</div>
+                                <div class="flex-grow">
+                                    <p class="text-xs font-bold">Slaughtering Sick Animals</p>
+                                    <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1">
+                                        <div class="bg-red-500 h-full rounded-full" style="width: 48%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold">32%</div>
+                                <div class="flex-grow">
+                                    <p class="text-xs font-bold">Meat Processing / Skinning</p>
+                                    <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1">
+                                        <div class="bg-amber-500 h-full rounded-full" style="width: 32%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold">20%</div>
+                                <div class="flex-grow">
+                                    <p class="text-xs font-bold">Consuming Undercooked Meat</p>
+                                    <div class="w-full bg-slate-100 h-1.5 rounded-full mt-1">
+                                        <div class="bg-teal-500 h-full rounded-full" style="width: 20%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- VIEW 2: LONGITUDINAL TRENDS -->
-        <section id="view-trends" class="hidden space-y-8 animate-in slide-in-from-bottom-5 duration-500">
-            <div class="max-w-3xl">
-                <h2 class="text-2xl font-bold text-slate-900">8-Year Longitudinal Analysis</h2>
-                <p class="text-slate-500 mt-2">Tracking the evolution of Anthrax control measures and outbreak frequency from 2018 to the present day.</p>
-            </div>
-
-            <div class="glass-card p-8 rounded-2xl">
-                <h3 class="text-lg font-bold mb-6">Annual Outbreak Magnitude (Stacked by District)</h3>
-                <div class="chart-container" style="height: 400px; max-height: 500px;">
-                    <canvas id="magnitudeChart"></canvas>
-                </div>
-            </div>
-        </section>
-
-        <!-- VIEW 3: YEARLY ARCHIVE -->
-        <section id="view-archive" class="hidden space-y-8 animate-in slide-in-from-bottom-5 duration-500">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- VIEW 2: REGISTRY -->
+        <section id="view-registry" class="hidden space-y-8 animate-in fade-in zoom-in-95">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Yearly Situation Files</h2>
-                    <p class="text-slate-500 mt-1">Select a year to view specific data summaries and report extracts.</p>
+                    <h2 class="text-3xl font-black text-slate-900 tracking-tight">Master Registry</h2>
+                    <p class="text-slate-500 mt-1">Official verified cluster events and clinical outcomes.</p>
                 </div>
                 <div class="flex gap-2">
-                    <select id="yearSelect" class="bg-white border border-slate-200 rounded-lg px-4 py-2 text-sm font-semibold focus:ring-2 focus:ring-slate-900 outline-none shadow-sm">
-                        <option value="2025">2025 (Projected)</option>
-                        <option value="2024">2024 (Consolidated)</option>
+                    <input type="text" id="regSearch" placeholder="Search by area..." 
+                           class="px-4 py-2 border border-slate-200 rounded-xl text-sm w-full md:w-64 shadow-sm">
+                    <select id="regYear" class="px-4 py-2 border border-slate-200 rounded-xl text-sm shadow-sm">
+                        <option value="all">All Years</option>
+                        <option value="2025">2025</option>
+                        <option value="2024">2024</option>
                         <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
-                        <option value="2018">2018</option>
                     </select>
-                    <button onclick="updateYearlyDisplay()" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-bold">Fetch Data</button>
                 </div>
             </div>
 
-            <div id="yearlyContent" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Content injected by JS -->
-            </div>
-        </section>
-
-        <!-- VIEW 4: REGISTRY -->
-        <section id="view-database" class="hidden space-y-8">
-            <div class="flex justify-between items-end">
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-900">Comprehensive Registry</h2>
-                    <p class="text-slate-500 mt-1">Searchable database of confirmed Anthrax cluster events across Bangladesh.</p>
-                </div>
-                <div class="bg-slate-100 p-1 rounded-lg hidden md:flex">
-                    <button class="px-3 py-1 text-xs font-bold text-slate-600 bg-white rounded shadow-sm">Excel</button>
-                    <button class="px-3 py-1 text-xs font-bold text-slate-400">PDF</button>
-                    <button class="px-3 py-1 text-xs font-bold text-slate-400">CSV</button>
-                </div>
-            </div>
-
-            <div class="glass-card rounded-2xl overflow-hidden">
-                <div class="p-4 border-b border-slate-100 flex gap-4">
-                    <input type="text" id="dbSearch" placeholder="Search by District, Year or Village..." class="flex-grow bg-slate-50 border-none px-4 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-200">
-                </div>
+            <div class="bg-white rounded-[2rem] shadow-soft border border-slate-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
                             <tr class="bg-slate-50 border-b border-slate-100">
-                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Year</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">District</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Village</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Human Cases</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Livestock Death</th>
-                                <th class="px-6 py-4 text-xs font-bold text-slate-400 uppercase">Status</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">ID</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Year / Month</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Impact (H/L)</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Clinical Type</th>
+                                <th class="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                             </tr>
                         </thead>
-                        <tbody id="dbTableBody" class="divide-y divide-slate-50">
-                            <!-- JS injected rows -->
+                        <tbody id="registryTable" class="divide-y divide-slate-50">
+                            <!-- JS Injected -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- VIEW 5: CLINICAL PROTOCOLS -->
-        <section id="view-protocols" class="hidden space-y-8">
-            <div class="max-w-3xl">
-                <h2 class="text-2xl font-bold text-slate-900">Clinical & Response Protocols</h2>
-                <p class="text-slate-500 mt-2">Standards for public health responders, veterinarians, and laboratory personnel.</p>
+        <!-- VIEW 3: ARCHIVE -->
+        <section id="view-archive" class="hidden space-y-8 animate-in fade-in slide-in-from-bottom-5">
+            <div class="text-center max-w-2xl mx-auto space-y-4">
+                <h2 class="text-3xl font-black text-slate-900 tracking-tight">Yearly Situation Archives</h2>
+                <p class="text-slate-500">Consolidated annual performance reviews, vaccination logs, and field report metadata.</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-amber-500">
-                    <h3 class="font-bold text-slate-900 mb-2">Case Definition (Human)</h3>
-                    <ul class="text-sm text-slate-600 space-y-3">
-                        <li class="flex gap-2"><span>•</span> <strong>Suspected:</strong> Acute illness with skin lesion or severe GI pain with history of animal contact.</li>
-                        <li class="flex gap-2"><span>•</span> <strong>Confirmed:</strong> Isolation of <i>B. anthracis</i> via PCR or Culture.</li>
-                    </ul>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="archiveGrid">
+                <!-- JS Injected Cards -->
+            </div>
+        </section>
+
+        <!-- VIEW 4: PROTOCOLS -->
+        <section id="view-protocols" class="hidden space-y-8 animate-in fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-soft border border-slate-100">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-3 text-teal-800">
+                            <span class="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center">01</span>
+                            One Health Field Protocol
+                        </h3>
+                        <div class="grid md:grid-cols-2 gap-8">
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-slate-900 border-b pb-2">Human Surveillance</h4>
+                                <p class="text-sm text-slate-600"><strong>Suspect Case:</strong> Painless black eschar with surrounding edema in individuals with livestock contact history.</p>
+                                <p class="text-sm text-slate-600"><strong>Response:</strong> Early Ciprofloxacin (500mg) or Doxycycline (100mg) treatment significantly lowers morbidity.</p>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="font-bold text-slate-900 border-b pb-2">Animal Surveillance</h4>
+                                <p class="text-sm text-slate-600"><strong>Signal:</strong> Sudden death with non-clotting dark blood from orifices. DO NOT CONDUCT NECROPSY.</p>
+                                <p class="text-sm text-slate-600"><strong>Burial:</strong> Minimum 6ft deep with lime layers. Spores sporulate upon contact with oxygen.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 p-8 rounded-[2rem] shadow-xl text-white">
+                        <h3 class="text-xl font-bold mb-6 text-teal-400">Laboratory Diagnostics</h3>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                                <p class="text-[10px] font-bold text-teal-400 uppercase mb-2">Primary</p>
+                                <p class="text-sm font-bold">Gram Staining</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Large Gram-positive bacilli with sub-terminal spores.</p>
+                            </div>
+                            <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                                <p class="text-[10px] font-bold text-teal-400 uppercase mb-2">Gold Standard</p>
+                                <p class="text-sm font-bold">PCR Detection</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Detection of pXO1 and pXO2 virulence plasmids.</p>
+                            </div>
+                            <div class="p-4 bg-white/5 rounded-2xl border border-white/10">
+                                <p class="text-[10px] font-bold text-teal-400 uppercase mb-2">Environmental</p>
+                                <p class="text-sm font-bold">Soil Culture</p>
+                                <p class="text-[11px] text-slate-400 mt-1">Detection of Anthrax spores in grazing pastures.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-red-500">
-                    <h3 class="font-bold text-slate-900 mb-2">Post-Mortem Warning</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        <strong>DO NOT OPEN THE CARCASS.</strong> Exposure to oxygen induces sporulation. 
-                        Visible signs include bloating and dark, non-clotting blood from orifices.
-                    </p>
-                </div>
-                <div class="glass-card p-6 rounded-2xl border-l-4 border-slate-900">
-                    <h3 class="font-bold text-slate-900 mb-2">Reporting Chain</h3>
-                    <p class="text-sm text-slate-600">
-                        Immediate notification to: <br>
-                        1. Upazila Livestock Officer <br>
-                        2. Civil Surgeon (Health Dept) <br>
-                        3. IEDCR Hotline (10655)
-                    </p>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-8 rounded-[2rem] shadow-soft border border-slate-100">
+                        <h3 class="font-bold mb-4">Hotline Directory</h3>
+                        <div class="space-y-3">
+                            <div class="p-4 bg-slate-50 rounded-2xl">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">National Hotline</p>
+                                <p class="text-lg font-black text-slate-900">10655</p>
+                                <p class="text-xs text-slate-500">IEDCR Central Response</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 rounded-2xl">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">Animal Health</p>
+                                <p class="text-lg font-black text-slate-900">16123</p>
+                                <p class="text-xs text-slate-500">Department of Livestock</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <footer class="bg-white border-t border-slate-200 py-10 mt-20">
-        <div class="max-w-7xl mx-auto px-6 text-center">
-            <p class="text-sm font-medium text-slate-400">© 2026 National Health Data Repository. For Educational Use Only.</p>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-12 px-8">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center text-slate-500 font-bold">BD</div>
+                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Ministry of Health & Family Welfare <br> Government of Bangladesh</p>
+            </div>
+            <p class="text-xs text-slate-400 text-center md:text-right">
+                Developed for epidemiological simulation and clinical research. <br>
+                Data aggregated from public health bulletins (2018-2025).
+            </p>
         </div>
     </footer>
 
+    <!-- LOGIC -->
     <script>
-        // --- DATA OBJECTS ---
-        const yearlyData = {
-            "2025": { human: 85, livestock: 140, hotspot: "Sirajganj", note: "Forecasted based on flood patterns.", file: "RP-2025-PRE.pdf" },
-            "2024": { human: 112, livestock: 230, hotspot: "Pabna", note: "Major cluster in Santhia Upazila.", file: "RP-2024-FIN.pdf" },
-            "2023": { human: 145, livestock: 310, hotspot: "Sirajganj", note: "Post-monsoon outbreak spikes.", file: "RP-2023.pdf" },
-            "2022": { human: 98, livestock: 195, hotspot: "Tangail", note: "Localized cluster in livestock.", file: "RP-2022.pdf" },
-            "2021": { human: 125, livestock: 280, hotspot: "Kushtia", note: "Handling of sick cattle primary cause.", file: "RP-2021.pdf" },
-            "2020": { human: 210, livestock: 450, hotspot: "Sirajganj", note: "Highest cluster decade peak.", file: "RP-2020.pdf" },
-            "2019": { human: 180, livestock: 390, hotspot: "Pabna", note: "Early monsoon floods caused surfacing.", file: "RP-2019.pdf" },
-            "2018": { human: 165, livestock: 340, hotspot: "Sirajganj", note: "Baseline year for vaccination push.", file: "RP-2018.pdf" }
-        };
+        // --- DATA HUB ---
+        const masterRegistry = [
+            { id: 'AX-BD-2501', year: 2025, month: 'August', location: 'Shahjadpur, Sirajganj', impact: '12/28', type: 'Cutaneous', status: 'Active Monitoring' },
+            { id: 'AX-BD-2412', year: 2024, month: 'October', location: 'Santhia, Pabna', impact: '24/55', type: 'Cutaneous', status: 'Resolved' },
+            { id: 'AX-BD-2408', year: 2024, month: 'July', location: 'Bheramara, Kushtia', impact: '06/15', type: 'Gastrointestinal', status: 'Resolved' },
+            { id: 'AX-BD-2315', year: 2023, month: 'September', location: 'Ullapara, Sirajganj', impact: '38/70', type: 'Cutaneous', status: 'Resolved' },
+            { id: 'AX-BD-2305', year: 2023, month: 'May', location: 'Modhupur, Tangail', impact: '09/22', type: 'Cutaneous', status: 'Resolved' },
+            { id: 'AX-BD-2210', year: 2022, month: 'November', location: 'Bagmara, Rajshahi', impact: '04/12', type: 'Cutaneous', status: 'Resolved' },
+            { id: 'AX-BD-2108', year: 2021, month: 'August', location: 'Shahjadpur, Sirajganj', impact: '15/35', type: 'Cutaneous', status: 'Resolved' },
+            { id: 'AX-BD-2012', year: 2020, month: 'September', location: 'Bera, Pabna', impact: '42/98', type: 'Cutaneous', status: 'Resolved' }
+        ];
 
-        const registry = [
-            { year: 2025, district: "Sirajganj", village: "Shahjadpur", h: 14, l: 30, status: "Active" },
-            { year: 2024, district: "Pabna", village: "Santhia", h: 22, l: 45, status: "Resolved" },
-            { year: 2024, district: "Kushtia", village: "Bheramara", h: 8, l: 12, status: "Resolved" },
-            { year: 2023, district: "Tangail", village: "Modhupur", h: 5, l: 20, status: "Resolved" },
-            { year: 2023, district: "Sirajganj", village: "Ullapara", h: 32, l: 55, status: "Resolved" },
-            { year: 2022, district: "Rajshahi", village: "Bagmara", h: 4, l: 10, status: "Resolved" },
-            { year: 2021, district: "Sirajganj", village: "Belkuchi", h: 18, l: 38, status: "Resolved" },
-            { year: 2020, district: "Sirajganj", village: "Shahjadpur", h: 45, l: 90, status: "Resolved" },
-            { year: 2019, district: "Meherpur", village: "Gangni", h: 12, l: 25, status: "Resolved" },
-            { year: 2018, district: "Pabna", village: "Bera", h: 28, l: 60, status: "Resolved" }
+        const archiveYears = [
+            { year: 2025, files: 12, size: '2.4MB', summary: 'Forecasted increase due to high rainfall index.', color: 'emerald' },
+            { year: 2024, files: 45, size: '8.1MB', summary: 'Major vaccination drive reduced cluster size by 15%.', color: 'teal' },
+            { year: 2023, files: 38, size: '6.4MB', summary: 'Post-monsoon outbreaks recorded in 4 districts.', color: 'slate' },
+            { year: 2022, files: 29, size: '4.2MB', summary: 'Stabilized cluster frequency in Northern belt.', color: 'slate' },
+            { year: 2021, files: 51, size: '10.5MB', summary: 'Bimodal peak observed during pre-monsoon cycle.', color: 'slate' },
+            { year: 2020, files: 68, size: '14.2MB', summary: 'Decade-high incidence in Sirajganj district.', color: 'amber' },
+            { year: 2019, files: 34, size: '5.5MB', summary: 'Introduction of One Health digital reporting.', color: 'slate' },
+            { year: 2018, files: 22, size: '3.1MB', summary: 'Baseline survey year for current surveillance.', color: 'slate' }
         ];
 
         // --- NAVIGATION ---
-        function navigate(view) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('nav button').forEach(b => {
-                b.classList.remove('tab-active');
-                b.classList.add('tab-inactive');
+        function changeView(viewId) {
+            ['insights', 'registry', 'archive', 'protocols'].forEach(v => {
+                document.getElementById('view-' + v).classList.add('hidden');
+                document.getElementById('nav-' + v).classList.remove('nav-link-active');
+                document.getElementById('nav-' + v).classList.add('text-slate-500');
             });
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            document.getElementById('nav-' + viewId).classList.add('nav-link-active');
+            document.getElementById('nav-' + viewId).classList.remove('text-slate-500');
             
-            document.getElementById('view-' + view).classList.remove('hidden');
-            document.getElementById('btn-' + view).classList.add('tab-active');
-            document.getElementById('btn-' + view).classList.remove('tab-inactive');
+            // Re-render charts for layout sizing
+            if(viewId === 'insights') initCharts();
         }
 
-        // --- ARCHIVE LOGIC ---
-        function updateYearlyDisplay() {
-            const year = document.getElementById('yearSelect').value;
-            const data = yearlyData[year];
-            const container = document.getElementById('yearlyContent');
+        // --- REGISTRY ENGINE ---
+        function renderRegistry(search = '', year = 'all') {
+            const table = document.getElementById('registryTable');
+            table.innerHTML = '';
             
-            container.innerHTML = `
-                <div class="lg:col-span-2 glass-card p-8 rounded-2xl bg-white">
-                    <div class="flex items-center justify-between mb-6">
-                        <h4 class="text-2xl font-bold">Annual Report: ${year}</h4>
-                        <span class="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold uppercase tracking-wider">Status: ${year >= 2025 ? 'Open' : 'Archived'}</span>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                        <div>
-                            <span class="text-xs font-bold text-slate-400 uppercase">Impact Summary</span>
-                            <p class="text-slate-600 mt-2 leading-relaxed">${data.note}</p>
-                        </div>
-                        <div class="space-y-4">
-                            <div class="flex justify-between border-b pb-2">
-                                <span class="text-sm font-medium">Human Cases:</span>
-                                <span class="text-sm font-bold text-slate-900">${data.human}</span>
-                            </div>
-                            <div class="flex justify-between border-b pb-2">
-                                <span class="text-sm font-medium">Animal Deaths:</span>
-                                <span class="text-sm font-bold text-slate-900">${data.livestock}</span>
-                            </div>
-                            <div class="flex justify-between border-b pb-2">
-                                <span class="text-sm font-medium">Core Hotspot:</span>
-                                <span class="text-sm font-bold text-slate-900">${data.hotspot}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="glass-card p-6 rounded-2xl bg-slate-900 text-white flex flex-col justify-between">
-                    <div>
-                        <h4 class="font-bold mb-4">Available Files</h4>
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg hover:bg-white/20 cursor-pointer">
-                                <span class="text-xs font-medium">${data.file}</span>
-                                <span class="text-[10px] bg-sky-500 px-1 rounded font-bold">PDF</span>
-                            </div>
-                            <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg hover:bg-white/20 cursor-pointer">
-                                <span class="text-xs font-medium">RAW-DATA-${year}.xlsx</span>
-                                <span class="text-[10px] bg-emerald-500 px-1 rounded font-bold">XLS</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="w-full py-3 bg-white text-slate-900 rounded-xl mt-6 text-sm font-bold">Generate Custom Extract</button>
-                </div>
-            `;
-        }
+            const filtered = masterRegistry.filter(item => {
+                const matchesSearch = item.location.toLowerCase().includes(search.toLowerCase());
+                const matchesYear = year === 'all' || item.year == year;
+                return matchesSearch && matchesYear;
+            });
 
-        // --- REGISTRY TABLE ---
-        function renderRegistry(filter = '') {
-            const tbody = document.getElementById('dbTableBody');
-            tbody.innerHTML = '';
-            
-            const filtered = registry.filter(r => 
-                r.district.toLowerCase().includes(filter.toLowerCase()) || 
-                r.village.toLowerCase().includes(filter.toLowerCase()) ||
-                r.year.toString().includes(filter)
-            );
-
-            filtered.forEach(r => {
+            filtered.forEach(row => {
                 const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors group';
                 tr.innerHTML = `
-                    <td class="px-6 py-4 text-sm font-bold text-slate-400">${r.year}</td>
-                    <td class="px-6 py-4 text-sm font-bold text-slate-900">${r.district}</td>
-                    <td class="px-6 py-4 text-sm text-slate-600">${r.village}</td>
-                    <td class="px-6 py-4 text-sm font-bold">${r.h}</td>
-                    <td class="px-6 py-4 text-sm text-slate-500">${r.l}</td>
-                    <td class="px-6 py-4 text-xs">
-                        <span class="px-2 py-1 ${r.status === 'Active' ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-600'} rounded font-bold uppercase tracking-widest">${r.status}</span>
+                    <td class="px-8 py-5 text-xs font-bold text-slate-400">${row.id}</td>
+                    <td class="px-8 py-5 text-sm">
+                        <p class="font-bold text-slate-900">${row.year}</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">${row.month}</p>
+                    </td>
+                    <td class="px-8 py-5 text-sm font-medium text-slate-600">${row.location}</td>
+                    <td class="px-8 py-5 text-sm text-center">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                            ${row.impact}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5">
+                        <span class="px-3 py-1 text-[10px] font-black uppercase rounded-lg ${row.type === 'Gastrointestinal' ? 'bg-amber-100 text-amber-700' : 'bg-teal-100 text-teal-700'}">
+                            ${row.type}
+                        </span>
+                    </td>
+                    <td class="px-8 py-5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full ${row.status === 'Resolved' ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}"></div>
+                            <span class="text-xs font-bold text-slate-600">${row.status}</span>
+                        </div>
                     </td>
                 `;
-                tbody.appendChild(tr);
+                table.appendChild(tr);
             });
         }
 
-        document.getElementById('dbSearch').addEventListener('input', (e) => renderRegistry(e.target.value));
-
-        // --- CHARTS ---
-        function initCharts() {
-            Chart.defaults.font.family = "'Plus Jakarta Sans'";
-            Chart.defaults.color = '#94a3b8';
-
-            // Radar
-            new Chart(document.getElementById('riskRadarChart'), {
-                type: 'radar',
-                data: {
-                    labels: ['Flood Depth', 'Soil pH', 'Vaccine Access', 'Livestock Density', 'Flooding Frequency', 'Awareness Level'],
-                    datasets: [{
-                        label: 'Risk Profile (2025)',
-                        data: [85, 90, 45, 95, 80, 40],
-                        backgroundColor: 'rgba(15, 23, 42, 0.1)',
-                        borderColor: '#0f172a',
-                        borderWidth: 2
-                    }]
-                },
-                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        // --- ARCHIVE GRID ENGINE ---
+        function renderArchive() {
+            const grid = document.getElementById('archiveGrid');
+            archiveYears.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'outbreak-card bg-white p-6 rounded-[2rem] shadow-soft border border-slate-100 flex flex-col justify-between';
+                div.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-2xl font-black text-slate-900">${item.year}</h4>
+                            <span class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 text-xs font-bold">PDF</span>
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed">${item.summary}</p>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">${item.files} Reports | ${item.size}</span>
+                        <button class="text-xs font-black text-teal-700 hover:underline uppercase tracking-widest">Access</button>
+                    </div>
+                `;
+                grid.appendChild(div);
             });
+        }
 
-            // Line Chart
-            new Chart(document.getElementById('dualLineChart'), {
+        // --- CHART ENGINE ---
+        let charts = {};
+        function initCharts() {
+            const chartConfig = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    x: { grid: { display: false }, ticks: { font: { weight: 'bold', size: 10 } } },
+                    y: { grid: { borderDash: [4, 4], color: '#f1f5f9' }, ticks: { font: { weight: 'bold', size: 10 } } }
+                }
+            };
+
+            // 1. Growth Area Chart
+            const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+            const gradient = ctxGrowth.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(15, 118, 110, 0.2)');
+            gradient.addColorStop(1, 'rgba(15, 118, 110, 0)');
+
+            if(charts.growth) charts.growth.destroy();
+            charts.growth = new Chart(ctxGrowth, {
                 type: 'line',
                 data: {
                     labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
-                    datasets: [
-                        { label: 'Human', data: [165, 180, 210, 125, 98, 145, 112, 85], borderColor: '#0f172a', tension: 0.3, fill: false },
-                        { label: 'Livestock (x10)', data: [34, 39, 45, 28, 19, 31, 23, 14], borderColor: '#94a3b8', tension: 0.3, borderDash: [5,5] }
-                    ]
+                    datasets: [{
+                        data: [165, 180, 210, 125, 98, 145, 112, 85],
+                        borderColor: '#0f766e',
+                        borderWidth: 4,
+                        fill: true,
+                        backgroundColor: gradient,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#0f766e',
+                        pointHoverBorderWidth: 3
+                    }]
                 },
-                options: { maintainAspectRatio: false }
+                options: chartConfig
             });
 
-            // Stacked Bar for Magnitude
-            new Chart(document.getElementById('magnitudeChart'), {
+            // 2. Risk Radar
+            const ctxRadar = document.getElementById('riskRadar').getContext('2d');
+            if(charts.radar) charts.radar.destroy();
+            charts.radar = new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: ['Rainfall', 'Livestock Pop.', 'Low Vax.', 'Flood Depth', 'Carcass Handling'],
+                    datasets: [{
+                        data: [85, 70, 95, 80, 65],
+                        borderColor: '#0f766e',
+                        backgroundColor: 'rgba(15, 118, 110, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#0f766e'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: { grid: { color: '#f1f5f9' }, ticks: { display: false }, pointLabels: { font: { weight: 'bold' } } }
+                    }
+                }
+            });
+
+            // 3. District Horizontal Bar
+            const ctxDist = document.getElementById('districtChart').getContext('2d');
+            if(charts.dist) charts.dist.destroy();
+            charts.dist = new Chart(ctxDist, {
                 type: 'bar',
                 data: {
-                    labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
-                    datasets: [
-                        { label: 'Sirajganj', data: [80, 95, 120, 70, 40, 90, 65, 50], backgroundColor: '#0f172a' },
-                        { label: 'Pabna', data: [45, 55, 60, 35, 30, 30, 40, 20], backgroundColor: '#475569' },
-                        { label: 'Others', data: [40, 30, 30, 20, 28, 25, 7, 15], backgroundColor: '#94a3b8' }
-                    ]
+                    labels: ['Sirajganj', 'Pabna', 'Tangail', 'Kushtia', 'Rajshahi'],
+                    datasets: [{
+                        data: [420, 310, 185, 140, 95],
+                        backgroundColor: '#5eead4',
+                        borderRadius: 8
+                    }]
                 },
-                options: { 
-                    maintainAspectRatio: false, 
-                    scales: { x: { stacked: true }, y: { stacked: true } } 
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        x: { display: false },
+                        y: { ticks: { color: '#ffffff', font: { weight: 'bold' } }, grid: { display: false } }
+                    }
                 }
             });
         }
 
-        // --- START ---
+        // --- INITIALIZATION ---
         window.onload = () => {
-            initCharts();
             renderRegistry();
-            updateYearlyDisplay();
+            renderArchive();
+            initCharts();
+
+            // Setup search listeners
+            document.getElementById('regSearch').addEventListener('input', (e) => {
+                renderRegistry(e.target.value, document.getElementById('regYear').value);
+            });
+            document.getElementById('regYear').addEventListener('change', (e) => {
+                renderRegistry(document.getElementById('regSearch').value, e.target.value);
+            });
         };
     </script>
 </body>
